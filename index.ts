@@ -30,88 +30,132 @@ async function main({
   stagehand: Stagehand; // Stagehand instance
 }) {
 
-  // Navigate to GitHub profile to confirm the link
-  await page.goto("https://github.com/HawiCaesar/hawicaesar");
-
-  // First, let's observe what's in the about section
-  // const [aboutAction] = await page.observe("Look at the about section on the right side of the page");
-  // await drawObserveOverlay(page, [aboutAction]);
-  // await page.waitForTimeout(2000);
-  // await clearOverlays(page);
-
-  // Extract the link from the about section dynamically
-  const { aboutLink } = await page.extract({
-    instruction: "extract the website URL from the about section on the right side (it should include vercel.app within the URL)",
-    schema: z.object({
-      aboutLink: z.string(),
-    }),
-  });
-
-  console.log(`Found link in about section: ${aboutLink}`);
-
-  // Navigate to the extracted link (ensuring it has proper protocol)
-  const fullUrl = aboutLink.startsWith('http') ? aboutLink : `https://${aboutLink}`;
-  await page.goto(fullUrl);
-
-  // Extract the about section from the page
-  const { aboutSection } = await page.extract({
-    instruction: "extract the about section content from this page",
-    schema: z.object({
-      aboutSection: z.string(),
-    }),
-  });
-
-  // Console.log the about section
-  console.log(aboutSection);
+  // Navigate to GoBEBA website
+  await page.goto("https://gobeba.com/");
   
-  // // Navigate to a URL
-  // await page.goto("https://docs.stagehand.dev/reference/introduction");
-
-  // // Use act() to take actions on the page
-  // await page.act("Click the search box");
-
-  // // Use observe() to plan an action before doing it
-  // const [action] = await page.observe(
-  //   "Type 'Tell me in one sentence why I should use Stagehand' into the search box",
-  // );
-  // await drawObserveOverlay(page, [action]); // Highlight the search box
-  // await page.waitForTimeout(1_000);
-  // await clearOverlays(page); // Remove the highlight before typing
-  // await page.act(action); // Take the action
-
-  // // For more on caching, check out our docs: https://docs.stagehand.dev/examples/caching
-  // await page.waitForTimeout(1_000);
-  // await actWithCache(page, "Click the suggestion to use AI");
-  // await page.waitForTimeout(5_000);
-
-  // // Use extract() to extract structured data from the page
-  // const { text } = await page.extract({
-  //   instruction:
-  //     "extract the text of the AI suggestion from the search results",
-  //   schema: z.object({
-  //     text: z.string(),
-  //   }),
-  // });
-  // stagehand.log({
-  //   category: "create-browser-app",
-  //   message: `Got AI Suggestion`,
-  //   auxiliary: {
-  //     text: {
-  //       value: text,
-  //       type: "string",
-  //     },
-  //   },
-  // });
-  // stagehand.log({
-  //   category: "create-browser-app",
-  //   message: `Metrics`,
-  //   auxiliary: {
-  //     metrics: {
-  //       value: JSON.stringify(stagehand.metrics),
-  //       type: "object",
-  //     },
-  //   },
-  // });
+  // Click on the WATER card component
+  await page.act("Click the WATER card component");
+  
+  // Wait for the page to load
+  await page.waitForTimeout(2000);
+  
+  // Confirm that "Keringet Mineral Water Refill 20L (Refill Only)" exists
+  const productExists = await page.extract({
+    instruction: "Check if 'Keringet Mineral Water Refill 20L (Refill Only)' product exists on the page",
+    schema: z.object({
+      exists: z.boolean(),
+      productName: z.string().optional(),
+    }),
+  });
+  
+  if (!productExists.exists) {
+    throw new Error("Keringet Mineral Water Refill 20L (Refill Only) product not found on the page");
+  }
+  
+  console.log("✅ Confirmed: Keringet Mineral Water Refill 20L (Refill Only) exists");
+  
+  // Confirm the price is "Ksh 595"
+  const priceInfo = await page.extract({
+    instruction: "Extract the price for 'Keringet Mineral Water Refill 20L (Refill Only)'",
+    schema: z.object({
+      price: z.string(),
+    }),
+  });
+  
+  if (!priceInfo.price.includes("595")) {
+    throw new Error(`Expected price Ksh 595, but found: ${priceInfo.price}`);
+  }
+  
+  console.log("✅ Confirmed: Price is Ksh 595");
+  
+  // Click on the "ADD TO CART" button for the Keringet Mineral Water product
+  await page.act("Click the ADD TO CART button for Keringet Mineral Water Refill 20L (Refill Only)");
+  
+  // Wait to see the "View cart" link appear
+  await page.waitForTimeout(2000);
+  
+  // Check if "View cart" link is visible
+  const viewCartExists = await page.extract({
+    instruction: "Check if 'View cart' link is visible on the page",
+    schema: z.object({
+      exists: z.boolean(),
+    }),
+  });
+  
+  if (!viewCartExists.exists) {
+    throw new Error("View cart link not found after adding item to cart");
+  }
+  
+  console.log("✅ Confirmed: View cart link appeared");
+  
+  // Click on "View cart" to go to cart page
+  await page.act("Click the View cart link");
+  
+  // Wait for the cart page to load
+  await page.waitForTimeout(2000);
+  
+  // Confirm cart details
+  const cartDetails = await page.extract({
+    instruction: "Extract cart details including product name, price, quantity, delivery cost, and total",
+    schema: z.object({
+      productName: z.string(),
+      productPrice: z.string(),
+      quantity: z.string(),
+      deliveryPrice: z.string(),
+      total: z.string(),
+    }),
+  });
+  
+  // Validate cart details
+  const validations = [
+    {
+      condition: cartDetails.productName.includes("Keringet Mineral Water Refill 20L"),
+      message: "Product name matches"
+    },
+    {
+      condition: cartDetails.productPrice.includes("595"),
+      message: "Product price is 595"
+    },
+    {
+      condition: cartDetails.quantity.includes("1"),
+      message: "Quantity is 1"
+    },
+    {
+      condition: cartDetails.deliveryPrice.includes("200"),
+      message: "Delivery cost is Ksh 200"
+    },
+    {
+      condition: cartDetails.total.includes("795"),
+      message: "Total is Ksh 795"
+    }
+  ];
+  
+  validations.forEach(({ condition, message }) => {
+    if (!condition) {
+      throw new Error(`Validation failed: ${message}`);
+    }
+    console.log(`✅ Confirmed: ${message}`);
+  });
+  
+  // Take a screenshot and save to desktop
+  const desktopPath = "/Users/brianhawi/Desktop/gobeba-cart-screenshot.png";
+  await page.screenshot({ path: desktopPath, fullPage: true });
+  
+  console.log(`📸 Screenshot saved to: ${desktopPath}`);
+  
+  // Log success message
+  stagehand.log({
+    category: "gobeba-water-order",
+    message: "Successfully completed GoBEBA water ordering test",
+    auxiliary: {
+      cartDetails: {
+        value: JSON.stringify(cartDetails),
+        type: "object",
+      },
+    },
+  });
+  
+  console.log("🎉 All validations passed! GoBEBA water ordering test completed successfully.");
 }
 
 /**
