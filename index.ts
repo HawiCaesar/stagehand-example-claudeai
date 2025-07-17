@@ -69,45 +69,131 @@ async function main({
     console.log("🔐 Entering KRA Password...");
     await page.act(`Type '${kraPassword}' into the password input field`);
     
-    // Extract the arithmetic problem from "Security Stamp" field
-    console.log("🧮 Solving arithmetic Security Stamp...");
-    const securityStamp = await page.extract({
-      instruction: "Extract the arithmetic problem from the Security Stamp field",
-      schema: z.object({
-        problem: z.string(),
-      }),
-    });
+    // Extract the arithmetic problem from "Security Stamp" field using OCR
+    console.log("🧮 Solving arithmetic Security Stamp (image-based)...");
     
-    // Simple arithmetic solver for basic operations
-    const solveArithmetic = (problem: string): number => {
-      // Remove any extra spaces and clean the problem
-      const cleanProblem = problem.replace(/\s+/g, '').trim();
+    // Wait longer for the security stamp to fully load
+    await page.waitForTimeout(2000);
+    
+    // Take a screenshot for debugging before extraction
+    const beforeScreenshot = "/Users/brianhawi/Desktop/security-stamp-before.png";
+    await page.screenshot({ path: beforeScreenshot, fullPage: true });
+    console.log(`📸 Before screenshot saved to: ${beforeScreenshot}`);
+    
+    // First, observe the Security Stamp area to get its exact location
+    const securityStampObservation = await page.observe("Find the Security Stamp section that contains the arithmetic problem with red numbers");
+    console.log("🔍 Security Stamp Observation:", securityStampObservation.length, "elements found");
+    
+    // Try multiple extraction approaches to get the correct arithmetic
+    let securityStampOCR: any;
+    
+    // Approach 1: Direct extraction with emphasis on the red numbers
+    try {
+      securityStampOCR = await page.extract({
+        instruction: "Look at the page and find the Security Stamp area. In this area, there are red-colored numbers that form an arithmetic problem. The problem follows the format: [number] [operator] [number] ?. For example, if you see red numbers showing '99 + 13 ?', extract: firstNumber='99', operator='+', secondNumber='13'. Look carefully at the actual red numbers displayed on the page, not any placeholder text.",
+        schema: z.object({
+          firstNumber: z.string(),
+          operator: z.string(),
+          secondNumber: z.string(),
+          fullProblem: z.string(),
+        }),
+      });
+    } catch (error) {
+      console.log("❌ First extraction failed, trying alternative...");
       
-      // Handle basic arithmetic operations
-      if (cleanProblem.includes('+')) {
-        const [a, b] = cleanProblem.split('+').map(x => parseInt(x.trim()));
-        return a + b;
-      } else if (cleanProblem.includes('-')) {
-        const [a, b] = cleanProblem.split('-').map(x => parseInt(x.trim()));
-        return a - b;
-      } else if (cleanProblem.includes('*') || cleanProblem.includes('×')) {
-        const [a, b] = cleanProblem.split(/[*×]/).map(x => parseInt(x.trim()));
-        return a * b;
-      } else if (cleanProblem.includes('/') || cleanProblem.includes('÷')) {
-        const [a, b] = cleanProblem.split(/[/÷]/).map(x => parseInt(x.trim()));
-        return Math.floor(a / b);
+      // Approach 2: Focus on the visual elements near the Security Stamp label
+      securityStampOCR = await page.extract({
+        instruction: "Near the text 'Security Stamp' on the page, there is an arithmetic expression with red numbers. Look for two numbers separated by either '+' or '-' followed by '?'. Extract these exact numbers and the operator. Ignore any sample text - focus only on the actual red numbers shown.",
+        schema: z.object({
+          firstNumber: z.string(),
+          operator: z.string(),
+          secondNumber: z.string(),
+          fullProblem: z.string(),
+        }),
+      });
+    }
+    
+    // Log what was extracted for debugging
+    console.log("🔍 OCR Extraction Results:");
+    console.log(`   First Number: "${securityStampOCR.firstNumber}"`);
+    console.log(`   Operator: "${securityStampOCR.operator}"`);
+    console.log(`   Second Number: "${securityStampOCR.secondNumber}"`);
+    console.log(`   Full Problem: "${securityStampOCR.fullProblem}"`);
+    
+    // Parse and solve the arithmetic problem
+    const solveImageBasedArithmetic = (first: string, operator: string, second: string): number => {
+      const num1 = parseInt(first.replace(/[^0-9]/g, ''));
+      const num2 = parseInt(second.replace(/[^0-9]/g, ''));
+      
+      if (isNaN(num1) || isNaN(num2)) {
+        throw new Error(`Invalid numbers extracted: ${first}, ${second}`);
       }
       
-      // If no operation found, try to evaluate as a simple expression
-      try {
-        return eval(cleanProblem);
-      } catch (error) {
-        throw new Error(`Cannot solve arithmetic problem: ${problem}`);
+      switch (operator.trim()) {
+        case '+':
+          return num1 + num2;
+        case '-':
+          return num1 - num2;
+        case '*':
+        case '×':
+          return num1 * num2;
+        case '/':
+        case '÷':
+          return Math.floor(num1 / num2);
+        default:
+          throw new Error(`Unknown operator: ${operator}`);
       }
     };
     
-    const answer = solveArithmetic(securityStamp.problem);
-    console.log(`🔢 Solved: ${securityStamp.problem} = ${answer}`);
+    let answer: number;
+    
+    try {
+      answer = solveImageBasedArithmetic(
+        securityStampOCR.firstNumber,
+        securityStampOCR.operator,
+        securityStampOCR.secondNumber
+      );
+      
+      console.log(`🔢 Solved: ${securityStampOCR.fullProblem} = ${answer}`);
+      console.log(`   First: ${securityStampOCR.firstNumber}, Operator: ${securityStampOCR.operator}, Second: ${securityStampOCR.secondNumber}`);
+      
+    } catch (error) {
+      console.log("❌ First OCR attempt failed, trying alternative approach...");
+      
+      // Take a screenshot for manual inspection
+      const securityStampScreenshot = "/Users/brianhawi/Desktop/security-stamp-debug.png";
+      await page.screenshot({ path: securityStampScreenshot, fullPage: true });
+      console.log(`📸 Security stamp screenshot saved to: ${securityStampScreenshot}`);
+      
+      // Try a different extraction approach
+      const alternativeOCR = await page.extract({
+        instruction: "Find the Security Stamp area on the page. Look for red colored numbers that form an arithmetic expression. There should be two numbers with either a + or - sign between them, followed by a question mark. Extract each component separately.",
+        schema: z.object({
+          numbers: z.array(z.string()),
+          operator: z.string(),
+          expression: z.string(),
+        }),
+      });
+      
+      console.log("🔍 Alternative OCR Results:");
+      console.log(`   Numbers: ${JSON.stringify(alternativeOCR.numbers)}`);
+      console.log(`   Operator: "${alternativeOCR.operator}"`);
+      console.log(`   Expression: "${alternativeOCR.expression}"`);
+      
+      if (alternativeOCR.numbers.length >= 2) {
+        const num1 = parseInt(alternativeOCR.numbers[0].replace(/[^0-9]/g, ''));
+        const num2 = parseInt(alternativeOCR.numbers[1].replace(/[^0-9]/g, ''));
+        
+        if (!isNaN(num1) && !isNaN(num2)) {
+          answer = alternativeOCR.operator.includes('+') ? num1 + num2 : num1 - num2;
+          console.log(`🔢 Alternative solve: ${num1} ${alternativeOCR.operator} ${num2} = ${answer}`);
+        } else {
+          throw new Error(`Could not parse numbers from alternative OCR: ${alternativeOCR.numbers}`);
+        }
+      } else {
+        throw new Error(`Alternative OCR failed to extract sufficient numbers: ${alternativeOCR.numbers}`);
+      }
+    }
     
     // Enter the answer in the Security Stamp input field
     await page.act(`Type '${answer}' into the Security Stamp input field`);
@@ -117,7 +203,7 @@ async function main({
     await page.act("Click the Login button");
     
     // Wait for login to complete
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     
     // Check if login was successful by looking for dashboard elements
     const loginSuccess = await page.extract({
