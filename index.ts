@@ -137,8 +137,8 @@ async function main({
     console.log(`✅ Confirmed: ${message}`);
   });
   
-  // Take a screenshot and save to desktop
-  const desktopPath = "/Users/brianhawi/Desktop/gobeba-cart-screenshot.png";
+  // Take a screenshot and save to desktop. Change the path to your desktop path
+  const desktopPath = "/path/to/desktop/gobeba-cart-screenshot.png";
   await page.screenshot({ path: desktopPath, fullPage: true });
   
   console.log(`📸 Screenshot saved to: ${desktopPath}`);
