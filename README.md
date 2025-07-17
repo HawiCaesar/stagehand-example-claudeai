@@ -33,6 +33,20 @@ https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=shari
 https://drive.google.com/file/d/196QiVcCZiJ8AMU21dZfP71qOgOFAU1SX/view?usp=sharing
 
 ---------------
+
+Math-A
+[<img src="./math-a.png.png"/>](https://google.com)
+
+Math-B
+[<img src="./math-b.png.png"/>](https://google.com)
+
+Math-C
+[<img src="./math-c.png.png"/>](https://google.com)
+
+Math-D
+[<img src="./math-d.png.png"/>](https://google.com)
+
+
 ***************
 
 ## 🤘 Welcome to Stagehand!
