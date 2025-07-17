@@ -10,7 +10,7 @@ The section should have a link that includes vercel.app
 Go to the link that includes vercel.app and extract the about section of the page and console.log it
 
 ### Video in action
-https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=drive_link
+https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=sharing
 
 ## feat/gobeba-order-water
 
@@ -30,6 +30,7 @@ https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=drive
 - Take a screenshot and save if on my desktop
 
 ### Video in action
+https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=sharing
 
 ---------------
 ***************
