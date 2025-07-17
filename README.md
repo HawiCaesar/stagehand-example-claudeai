@@ -35,16 +35,16 @@ https://drive.google.com/file/d/196QiVcCZiJ8AMU21dZfP71qOgOFAU1SX/view?usp=shari
 ---------------
 
 Math-A
-[<img src="./math-a.png.png"/>](https://google.com)
+[<img src="./math-a.png"/>](https://google.com)
 
 Math-B
-[<img src="./math-b.png.png"/>](https://google.com)
+[<img src="./math-b.png"/>](https://google.com)
 
 Math-C
-[<img src="./math-c.png.png"/>](https://google.com)
+[<img src="./math-c.png"/>](https://google.com)
 
 Math-D
-[<img src="./math-d.png.png"/>](https://google.com)
+[<img src="./math-d.png"/>](https://google.com)
 
 
 ***************
