@@ -4,6 +4,12 @@ With this repo I am using branches. The README will include branches trying out 
 ## The main branch
 The main branch
 
+### Prompt
+Go to https://github.com/HawiCaesar/hawicaesar and in the about section on the right. 
+The section should have a link that includes vercel.app
+Go to the link that includes vercel.app and extract the about section of the page and console.log it
+
+### Video in action
 
 ## feat/gobeba-order-water
 
@@ -25,6 +31,8 @@ The main branch
 ### Video in action
 
 ---------------
+***************
+
 ## 🤘 Welcome to Stagehand!
 
 Hey! This is a project built with [Stagehand](https://github.com/browserbase/stagehand).
