@@ -1,4 +1,31 @@
-# 🤘 Welcome to Stagehand!
+# Experimenting browser automation with Stagehand
+With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
+
+## The main branch
+The main branch
+
+
+## feat/gobeba-order-water
+
+### Prompt
+- Go over to @https://gobeba.com/ 
+- Click on the card component that is labelled "WATER"
+- Wait for the page to load, say 2 seconds
+- Confirm that "Keringet Mineral Water Refill 20L (Refill Only)" exists
+- Confirm that the price is "Ksh 595"
+- Click on the "ADD TO CART" button link for the "Keringet Mineral Water Refill 20L (Refill Only)" product
+- Wait to see the "View cart" link after the "ADD TO CART" button link
+- Wait for the page to load, say 2 seconds
+- Confirm the following from the cart page
+   1. 	Keringet Mineral Water Refill 20L (Refill Only) priced at 595 with 1 quantity only
+   2. Delivery is Ksh 200
+   3. The total is Ksh 795
+- Take a screenshot and save if on my desktop
+
+### Video in action
+
+---------------
+## 🤘 Welcome to Stagehand!
 
 Hey! This is a project built with [Stagehand](https://github.com/browserbase/stagehand).
 
