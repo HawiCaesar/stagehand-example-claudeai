@@ -30,88 +30,175 @@ async function main({
   stagehand: Stagehand; // Stagehand instance
 }) {
 
-  // Navigate to GitHub profile to confirm the link
-  await page.goto("https://github.com/HawiCaesar/hawicaesar");
-
-  // First, let's observe what's in the about section
-  // const [aboutAction] = await page.observe("Look at the about section on the right side of the page");
-  // await drawObserveOverlay(page, [aboutAction]);
-  // await page.waitForTimeout(2000);
-  // await clearOverlays(page);
-
-  // Extract the link from the about section dynamically
-  const { aboutLink } = await page.extract({
-    instruction: "extract the website URL from the about section on the right side (it should include vercel.app within the URL)",
-    schema: z.object({
-      aboutLink: z.string(),
-    }),
-  });
-
-  console.log(`Found link in about section: ${aboutLink}`);
-
-  // Navigate to the extracted link (ensuring it has proper protocol)
-  const fullUrl = aboutLink.startsWith('http') ? aboutLink : `https://${aboutLink}`;
-  await page.goto(fullUrl);
-
-  // Extract the about section from the page
-  const { aboutSection } = await page.extract({
-    instruction: "extract the about section content from this page",
-    schema: z.object({
-      aboutSection: z.string(),
-    }),
-  });
-
-  // Console.log the about section
-  console.log(aboutSection);
+  // Navigate to KRA Portal
+  console.log("🌐 Navigating to KRA Portal...");
   
-  // // Navigate to a URL
-  // await page.goto("https://docs.stagehand.dev/reference/introduction");
-
-  // // Use act() to take actions on the page
-  // await page.act("Click the search box");
-
-  // // Use observe() to plan an action before doing it
-  // const [action] = await page.observe(
-  //   "Type 'Tell me in one sentence why I should use Stagehand' into the search box",
-  // );
-  // await drawObserveOverlay(page, [action]); // Highlight the search box
-  // await page.waitForTimeout(1_000);
-  // await clearOverlays(page); // Remove the highlight before typing
-  // await page.act(action); // Take the action
-
-  // // For more on caching, check out our docs: https://docs.stagehand.dev/examples/caching
-  // await page.waitForTimeout(1_000);
-  // await actWithCache(page, "Click the suggestion to use AI");
-  // await page.waitForTimeout(5_000);
-
-  // // Use extract() to extract structured data from the page
-  // const { text } = await page.extract({
-  //   instruction:
-  //     "extract the text of the AI suggestion from the search results",
-  //   schema: z.object({
-  //     text: z.string(),
-  //   }),
-  // });
-  // stagehand.log({
-  //   category: "create-browser-app",
-  //   message: `Got AI Suggestion`,
-  //   auxiliary: {
-  //     text: {
-  //       value: text,
-  //       type: "string",
-  //     },
-  //   },
-  // });
-  // stagehand.log({
-  //   category: "create-browser-app",
-  //   message: `Metrics`,
-  //   auxiliary: {
-  //     metrics: {
-  //       value: JSON.stringify(stagehand.metrics),
-  //       type: "object",
-  //     },
-  //   },
-  // });
+  try {
+    await page.goto("https://itax.kra.go.ke/KRA-Portal", { timeout: 30000 });
+    console.log("✅ KRA Portal is reachable");
+    
+    // Wait for page to load
+    await page.waitForTimeout(3000);
+    
+    // Click on the input field labelled "Enter PIN/User ID"
+    console.log("🔍 Looking for PIN/User ID input field...");
+    await page.act("Click on the input field labelled 'Enter PIN/User ID'");
+    
+    // Enter the KRA Pin from environment variable
+    const kraPin = process.env.KRA_PIN;
+    if (!kraPin) {
+      throw new Error("KRA_PIN not found in environment variables");
+    }
+    
+    console.log("📝 Entering KRA PIN...");
+    await page.act(`Type '${kraPin}' into the PIN/User ID input field`);
+    
+    // Click on "Continue"
+    console.log("⏭️ Clicking Continue...");
+    await page.act("Click the Continue button");
+    
+    // Wait for password page to load
+    await page.waitForTimeout(2000);
+    
+    // Enter the KRA password from environment variable
+    const kraPassword = process.env.KRA_PASSWORD;
+    if (!kraPassword) {
+      throw new Error("KRA_PASSWORD not found in environment variables");
+    }
+    
+    console.log("🔐 Entering KRA Password...");
+    await page.act(`Type '${kraPassword}' into the password input field`);
+    
+    // Extract the arithmetic problem from "Security Stamp" field
+    console.log("🧮 Solving arithmetic Security Stamp...");
+    const securityStamp = await page.extract({
+      instruction: "Extract the arithmetic problem from the Security Stamp field",
+      schema: z.object({
+        problem: z.string(),
+      }),
+    });
+    
+    // Simple arithmetic solver for basic operations
+    const solveArithmetic = (problem: string): number => {
+      // Remove any extra spaces and clean the problem
+      const cleanProblem = problem.replace(/\s+/g, '').trim();
+      
+      // Handle basic arithmetic operations
+      if (cleanProblem.includes('+')) {
+        const [a, b] = cleanProblem.split('+').map(x => parseInt(x.trim()));
+        return a + b;
+      } else if (cleanProblem.includes('-')) {
+        const [a, b] = cleanProblem.split('-').map(x => parseInt(x.trim()));
+        return a - b;
+      } else if (cleanProblem.includes('*') || cleanProblem.includes('×')) {
+        const [a, b] = cleanProblem.split(/[*×]/).map(x => parseInt(x.trim()));
+        return a * b;
+      } else if (cleanProblem.includes('/') || cleanProblem.includes('÷')) {
+        const [a, b] = cleanProblem.split(/[/÷]/).map(x => parseInt(x.trim()));
+        return Math.floor(a / b);
+      }
+      
+      // If no operation found, try to evaluate as a simple expression
+      try {
+        return eval(cleanProblem);
+      } catch (error) {
+        throw new Error(`Cannot solve arithmetic problem: ${problem}`);
+      }
+    };
+    
+    const answer = solveArithmetic(securityStamp.problem);
+    console.log(`🔢 Solved: ${securityStamp.problem} = ${answer}`);
+    
+    // Enter the answer in the Security Stamp input field
+    await page.act(`Type '${answer}' into the Security Stamp input field`);
+    
+    // Click "Login"
+    console.log("🔑 Clicking Login...");
+    await page.act("Click the Login button");
+    
+    // Wait for login to complete
+    await page.waitForTimeout(5000);
+    
+    // Check if login was successful by looking for dashboard elements
+    const loginSuccess = await page.extract({
+      instruction: "Check if login was successful by looking for dashboard or main menu elements",
+      schema: z.object({
+        success: z.boolean(),
+        message: z.string(),
+      }),
+    });
+    
+    if (loginSuccess.success) {
+      console.log("✅ Login successful! Accessing KRA dashboard...");
+      
+      // Navigate to payments section for April consultation
+      console.log("💰 Looking for payments section...");
+      await page.act("Click on payments or tax consultation section");
+      
+      // Wait for payments page to load
+      await page.waitForTimeout(3000);
+      
+      // Look for April payments or set date filter to April
+      console.log("📅 Setting date filter to April...");
+      await page.act("Set date filter or select April for payment consultation");
+      
+      // Wait for results to load
+      await page.waitForTimeout(3000);
+      
+      // Extract payment information for April
+      const aprilPayments = await page.extract({
+        instruction: "Extract April payment information including dates, amounts, and payment status",
+        schema: z.object({
+          payments: z.array(z.object({
+            date: z.string(),
+            amount: z.string(),
+            status: z.string(),
+            description: z.string(),
+          })),
+        }),
+      });
+      
+      console.log("💳 April Payment Information:");
+      aprilPayments.payments.forEach((payment, index) => {
+        console.log(`  ${index + 1}. Date: ${payment.date}, Amount: ${payment.amount}, Status: ${payment.status}, Description: ${payment.description}`);
+      });
+      
+      // Log to Stagehand
+      stagehand.log({
+        category: "kra-payment-consultation",
+        message: "Successfully consulted April payments on KRA portal",
+        auxiliary: {
+          aprilPayments: {
+            value: JSON.stringify(aprilPayments),
+            type: "object",
+          },
+        },
+      });
+      
+    } else {
+      console.log("❌ Login failed:", loginSuccess.message);
+    }
+    
+    // Take a screenshot and save to desktop
+    const desktopPath = "/Users/brianhawi/Desktop/kra-portal-screenshot.png";
+    await page.screenshot({ path: desktopPath, fullPage: true });
+    console.log(`📸 Screenshot saved to: ${desktopPath}`);
+    
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.log("❌ KRA Portal is not reachable or error occurred:", errorMessage);
+    
+    // Take a screenshot of the error and save to desktop
+    const errorScreenshotPath = "/Users/brianhawi/Desktop/kra-portal-error-screenshot.png";
+    await page.screenshot({ path: errorScreenshotPath, fullPage: true });
+    console.log(`📸 Error screenshot saved to: ${errorScreenshotPath}`);
+    
+    // End the session
+    console.log("🔚 Ending session due to portal unreachability or error");
+    return;
+  }
+  
+  console.log("🎉 KRA payment consultation completed successfully!");
 }
 
 /**
