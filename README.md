@@ -1,4 +1,4 @@
-# Experimenting browser automation with Stagehand
+# Experimenting: Browser automation with Stagehand
 With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
 
 ## The main branch
@@ -27,7 +27,7 @@ https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=shari
    1. 	Keringet Mineral Water Refill 20L (Refill Only) priced at 595 with 1 quantity only
    2. Delivery is Ksh 200
    3. The total is Ksh 795
-- Take a screenshot and save if on my desktop
+- Take a screenshot and save it on my desktop
 
 ### Video in action
 https://drive.google.com/file/d/196QiVcCZiJ8AMU21dZfP71qOgOFAU1SX/view?usp=sharing
