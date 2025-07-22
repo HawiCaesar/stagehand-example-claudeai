@@ -1,5 +1,5 @@
 # Experimenting: Browser automation with Stagehand
-With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
+A Stagehand playground repo. With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
 
 ## The main branch
 The main branch
