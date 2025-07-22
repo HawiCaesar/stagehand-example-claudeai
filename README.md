@@ -1,7 +1,7 @@
 # Experimenting: Browser automation with Stagehand
 A Stagehand playground repo. With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
 
-## The main branch
+## 🎋 The main branch
 The main branch
 
 ### Prompt
@@ -12,7 +12,7 @@ Go to the link that includes vercel.app and extract the about section of the pag
 ### Video in action
 https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=sharing
 
-## feat/gobeba-order-water
+## 🎋 feat/gobeba-order-water
 
 ### Prompt
 - Go over to @https://gobeba.com/ 
