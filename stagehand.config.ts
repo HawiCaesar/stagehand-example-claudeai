@@ -22,8 +22,11 @@ const StagehandConfig: ConstructorParams = {
     undefined /* Session ID for resuming Browserbase sessions */,
   browserbaseSessionCreateParams: {
     projectId: process.env.BROWSERBASE_PROJECT_ID!,
+    proxies: true,
     browserSettings: {
       blockAds: true,
+      // captchaImageSelector: 'img#captcha_img',
+      // captchaInputSelector: 'input#captcahText',
       viewport: {
         width: 1024,
         height: 768,
@@ -31,6 +34,7 @@ const StagehandConfig: ConstructorParams = {
     },
   },
   localBrowserLaunchOptions: {
+    headless: false, // Visible browser is less detectable
     viewport: {
       width: 1024,
       height: 768,

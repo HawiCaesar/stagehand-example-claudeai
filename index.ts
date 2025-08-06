@@ -1,9 +1,11 @@
-import { Stagehand, Page, BrowserContext } from "@browserbasehq/stagehand";
-import StagehandConfig from "./stagehand.config.js";
-import chalk from "chalk";
-import boxen from "boxen";
-import { drawObserveOverlay, clearOverlays, actWithCache } from "./utils.js";
-import { z } from "zod";
+import { Stagehand, Page, BrowserContext } from '@browserbasehq/stagehand';
+import StagehandConfig from './stagehand.config.js';
+import chalk from 'chalk';
+import boxen from 'boxen';
+import { drawObserveOverlay, clearOverlays, actWithCache } from './utils.js';
+import { z } from 'zod';
+import sharp from 'sharp';
+import GoogleCloudVision from '@google-cloud/vision';
 
 /**
  * 🤘 Welcome to Stagehand! Thanks so much for trying us out!
@@ -23,95 +25,198 @@ import { z } from "zod";
 async function main({
   page,
   context,
-  stagehand,
+  stagehand
 }: {
   page: Page; // Playwright Page with act, extract, and observe methods
   context: BrowserContext; // Playwright BrowserContext
   stagehand: Stagehand; // Stagehand instance
 }) {
+  console.log(chalk.blue('🚀 Starting KRA Portal Login Process'));
 
-  // Navigate to GitHub profile to confirm the link
-  await page.goto("https://github.com/HawiCaesar/hawicaesar");
+  const kraPin = process.env.KRA_PIN;
+  const kraPassword = process.env.KRA_PASSWORD;
+  const googleCloudVisionApiKey = process.env.GOOGLE_CLOUD_VISION_API_KEY;
 
-  // First, let's observe what's in the about section
-  // const [aboutAction] = await page.observe("Look at the about section on the right side of the page");
-  // await drawObserveOverlay(page, [aboutAction]);
-  // await page.waitForTimeout(2000);
-  // await clearOverlays(page);
+  if (!kraPin || !kraPassword) {
+    console.log(
+      chalk.red(
+        '❌ KRA_PIN and KRA_PASSWORD must be set in environment variables'
+      )
+    );
+    await page.screenshot({
+      path: '/Users/brianhawi/Desktop/error-missing-credentials.png',
+      fullPage: true
+    });
+    return;
+  }
 
-  // Extract the link from the about section dynamically
-  const { aboutLink } = await page.extract({
-    instruction: "extract the website URL from the about section on the right side (it should include vercel.app within the URL)",
-    schema: z.object({
-      aboutLink: z.string(),
-    }),
-  });
+  try {
+    console.log(chalk.yellow('📍 Navigating to KRA Portal...'));
+    await page.goto('https://itax.kra.go.ke/KRA-Portal', {
+      waitUntil: 'networkidle'
+    });
 
-  console.log(`Found link in about section: ${aboutLink}`);
+    // Check if portal is reachable by looking for key elements
+    console.log(chalk.yellow('🔍 Checking if portal is reachable...'));
+    await page.waitForLoadState('networkidle');
 
-  // Navigate to the extracted link (ensuring it has proper protocol)
-  const fullUrl = aboutLink.startsWith('http') ? aboutLink : `https://${aboutLink}`;
-  await page.goto(fullUrl);
+    // Look for the PIN/User ID input field to verify portal is working
+    const pinInputAction = await page.observe(
+      "Click on the input field labelled 'Enter PIN/User ID'"
+    );
 
-  // Extract the about section from the page
-  const { aboutSection } = await page.extract({
-    instruction: "extract the about section content from this page",
-    schema: z.object({
-      aboutSection: z.string(),
-    }),
-  });
+    if (pinInputAction && pinInputAction.length > 0) {
+      console.log(
+        chalk.green('✅ Portal is reachable, proceeding with login...')
+      );
 
-  // Console.log the about section
-  console.log(aboutSection);
-  
-  // // Navigate to a URL
-  // await page.goto("https://docs.stagehand.dev/reference/introduction");
+      // Step 1: Click on PIN/User ID input field
+      console.log(chalk.yellow('📝 Entering KRA PIN...'));
+      await page.act(pinInputAction[0]);
+      await page.keyboard.type(kraPin);
 
-  // // Use act() to take actions on the page
-  // await page.act("Click the search box");
+      // Step 2: Click Continue
+      console.log(chalk.yellow('⏭️ Clicking Continue...'));
+      await page.act("Click on 'Continue'");
 
-  // // Use observe() to plan an action before doing it
-  // const [action] = await page.observe(
-  //   "Type 'Tell me in one sentence why I should use Stagehand' into the search box",
-  // );
-  // await drawObserveOverlay(page, [action]); // Highlight the search box
-  // await page.waitForTimeout(1_000);
-  // await clearOverlays(page); // Remove the highlight before typing
-  // await page.act(action); // Take the action
+      // Wait for password field to appear
+      await page.waitForTimeout(2000);
 
-  // // For more on caching, check out our docs: https://docs.stagehand.dev/examples/caching
-  // await page.waitForTimeout(1_000);
-  // await actWithCache(page, "Click the suggestion to use AI");
-  // await page.waitForTimeout(5_000);
+      // Step 3: Enter password
+      console.log(chalk.yellow('🔐 Entering password...'));
+      await page.act('Click on the password input field');
+      await page.keyboard.type(kraPassword);
 
-  // // Use extract() to extract structured data from the page
-  // const { text } = await page.extract({
-  //   instruction:
-  //     "extract the text of the AI suggestion from the search results",
-  //   schema: z.object({
-  //     text: z.string(),
-  //   }),
+      // // Step 4: Handle Security Stamp (CAPTCHA)
+      console.log(chalk.yellow('🔒 Handling Security Stamp...'));
+
+      const captchaSrc = await page.getAttribute('img#captcha_img', 'src');
+      console.log(chalk.blue(`📸 Captcha URL: ${captchaSrc}`));
+
+      if (captchaSrc) {
+        console.log(chalk.blue('🖼️ Found captcha image, processing...'));
+
+        // Construct full URL for the captcha image
+        const fullCaptchaUrl = captchaSrc.startsWith('http')
+          ? captchaSrc
+          : `https://itax.kra.go.ke${captchaSrc}`;
+
+        console.log(chalk.blue(`📸 Captcha URL: ${fullCaptchaUrl}`));
+
+        // Open captcha image in new tab
+        const newPage = await context.newPage();
+        await newPage.goto(fullCaptchaUrl);
+
+
+        await newPage.waitForTimeout(3000);
+
+        // Save the captcha image
+        await newPage.screenshot({
+          path: '/Users/brianhawi/Desktop/KRA-security-capture.png'
+          //fullPage: true
+        });
+
+        await newPage.waitForTimeout(3000);
+
+        const answer = await evaluateArithmetic();
+        console.log(chalk.green(`🎯 Calculated answer: ${answer}`));
+
+        if (Number.isNaN(answer)) {
+          console.log(chalk.red('❌ Could not solve arithmetic'));
+          await newPage.close();
+          return;
+        }
+
+        const allPages = await context.pages(); // Get all open pages
+        const previousPage = allPages[0]; // Assuming the first page is your "previous" tab
+        await previousPage.bringToFront(); // Switch to the previous tab
+
+        // await previousPage.waitForTimeout(1500);
+        await allPages[1].close();
+
+        const captchaText = await previousPage.locator(
+          'input[name="captcahText"]'
+        );
+        console.log({ captchaText }, '######################');
+        await captchaText.fill(answer.toString());
+
+        await previousPage.screenshot({
+          path: '/Users/brianhawi/Desktop/KRA-math-result-screenshot.png',
+          fullPage: true
+        });
+
+        await previousPage.waitForTimeout(1500);
+
+        await previousPage.getByRole('link', { name: 'Login' }).click();
+
+        await previousPage.waitForTimeout(3000);
+
+        await previousPage.screenshot({
+          path: '/Users/brianhawi/Desktop/KRA-final-logged-in-screenshot.png',
+          fullPage: true
+        });
+
+        await previousPage.waitForTimeout(3000);
+      }
+
+       console.log(chalk.green('✅ Login process completed'));
+    } else {
+      console.log(
+        chalk.red('❌ Portal is not reachable - no PIN input field found')
+      );
+    }
+  } catch (error) {
+    console.log(chalk.red(`❌ Error during portal access: ${error}`));
+  }
+
+  // Always take a final screenshot
+  console.log(chalk.yellow('📷 Taking final screenshot...'));
+  // await page.screenshot({
+  //   path: '/Users/brianhawi/Desktop/KRA-final-logged-in-screenshot.png',
+  //   fullPage: true
   // });
-  // stagehand.log({
-  //   category: "create-browser-app",
-  //   message: `Got AI Suggestion`,
-  //   auxiliary: {
-  //     text: {
-  //       value: text,
-  //       type: "string",
-  //     },
-  //   },
-  // });
-  // stagehand.log({
-  //   category: "create-browser-app",
-  //   message: `Metrics`,
-  //   auxiliary: {
-  //     metrics: {
-  //       value: JSON.stringify(stagehand.metrics),
-  //       type: "object",
-  //     },
-  //   },
-  // });
+
+  console.log(chalk.green('🎉 KRA login process completed'));
+}
+
+function sharpenImage() {
+  // sharpen image
+  const inputPath = '/Users/brianhawi/Desktop/KRA-security-capture.png';
+  const outputPath =
+    '/Users/brianhawi/Desktop/KRA-security-capture-resized.png';
+
+  sharp(inputPath).resize(3274, 1832).sharpen().toFile(outputPath);
+}
+
+// Simple arithmetic evaluator for security stamp
+async function evaluateArithmetic(): Promise<number> {
+  // sharpen image
+  sharpenImage();
+
+  try {
+    // Creates a client
+    const client = new GoogleCloudVision.ImageAnnotatorClient();
+
+    // Performs text detection on the image file
+    const [result] = await client.textDetection(
+      '/Users/brianhawi/Desktop/KRA-security-capture-resized.png'
+    );
+    const labels = result.textAnnotations;
+
+    const mathOperationWithoutQuestionMark = labels?.[0]?.description
+      ?.replace(/\?$|7$/, '')
+      .trim();
+    console.log(mathOperationWithoutQuestionMark, '**************');
+    const mathOperationWithoutSpaces =
+      mathOperationWithoutQuestionMark?.replace(/\s+/g, '');
+
+    console.log(mathOperationWithoutSpaces, '######################');
+
+    return parseInt(eval(mathOperationWithoutSpaces ?? 'NaN'));
+  } catch (error) {
+    console.log(chalk.red(`❌ Error during portal access: ${error}`));
+    return NaN;
+  }
 }
 
 /**
@@ -122,22 +227,22 @@ async function main({
  */
 async function run() {
   const stagehand = new Stagehand({
-    ...StagehandConfig,
+    ...StagehandConfig
   });
   await stagehand.init();
 
-  if (StagehandConfig.env === "BROWSERBASE" && stagehand.browserbaseSessionID) {
+  if (StagehandConfig.env === 'BROWSERBASE' && stagehand.browserbaseSessionID) {
     console.log(
       boxen(
         `View this session live in your browser: \n${chalk.blue(
-          `https://browserbase.com/sessions/${stagehand.browserbaseSessionID}`,
+          `https://browserbase.com/sessions/${stagehand.browserbaseSessionID}`
         )}`,
         {
-          title: "Browserbase",
+          title: 'Browserbase',
           padding: 1,
-          margin: 3,
-        },
-      ),
+          margin: 3
+        }
+      )
     );
   }
 
@@ -146,13 +251,13 @@ async function run() {
   await main({
     page,
     context,
-    stagehand,
+    stagehand
   });
   await stagehand.close();
   console.log(
     `\n🤘 Thanks so much for using Stagehand! Reach out to us on Slack if you have any feedback: ${chalk.blue(
-      "https://stagehand.dev/slack",
-    )}\n`,
+      'https://stagehand.dev/slack'
+    )}\n`
   );
 }
 
