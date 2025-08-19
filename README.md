@@ -38,13 +38,13 @@ This was an example attempt to see if I could login "as a human" with browser au
 
 This IS NOT AN ATTEMPT to brute force into the itax portal! BrowserBase provides anti-bot mechanisms and I was attempting to micmic human behaviour.
 
-The goal at some point was to allow logging in and viewing payments my done.
+The goal at some point was to allow logging in and viewing payments done.
 Why?
-I have worked remotely and I've paid taxes before and I was attempting to automate that section.
+I have worked remotely and I've paid taxes before and I was attempting to automate the logging in and consulting payments.
 And probably in future allow tax professionals to run scripts automatically.
 
 Used
-- Google Vision API and Sharp to help solve the capture. 
+- Google Vision API and Sharp to help solve the capture.
 - BrowserBase basic auto capture tools didnt work for me 🤷🏾‍♂️
 
 ### Prompt
