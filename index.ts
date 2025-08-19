@@ -35,7 +35,7 @@ async function main({
 
   const kraPin = process.env.KRA_PIN;
   const kraPassword = process.env.KRA_PASSWORD;
-  const googleCloudVisionApiKey = process.env.GOOGLE_CLOUD_VISION_API_KEY;
+  //const googleCloudVisionApiKey = process.env.GOOGLE_CLOUD_VISION_API_KEY;
 
   if (!kraPin || !kraPassword) {
     console.log(
@@ -44,7 +44,7 @@ async function main({
       )
     );
     await page.screenshot({
-      path: '/Users/brianhawi/Desktop/error-missing-credentials.png',
+      path: '/path/to/desktop/error-missing-credentials.png',
       fullPage: true
     });
     return;
@@ -112,7 +112,7 @@ async function main({
 
         // Save the captcha image
         await newPage.screenshot({
-          path: '/Users/brianhawi/Desktop/KRA-security-capture.png'
+          path: '/path/to/desktop/KRA-security-capture.png'
           //fullPage: true
         });
 
@@ -141,7 +141,7 @@ async function main({
         await captchaText.fill(answer.toString());
 
         await previousPage.screenshot({
-          path: '/Users/brianhawi/Desktop/KRA-math-result-screenshot.png',
+          path: '/path/to/desktop/KRA-math-result-screenshot.png',
           fullPage: true
         });
 
@@ -152,7 +152,7 @@ async function main({
         await previousPage.waitForTimeout(3000);
 
         await previousPage.screenshot({
-          path: '/Users/brianhawi/Desktop/KRA-final-logged-in-screenshot.png',
+          path: '/path/to/desktop/KRA-final-logged-in-screenshot.png',
           fullPage: true
         });
 
@@ -172,7 +172,7 @@ async function main({
   // Always take a final screenshot
   console.log(chalk.yellow('📷 Taking final screenshot...'));
   // await page.screenshot({
-  //   path: '/Users/brianhawi/Desktop/KRA-final-logged-in-screenshot.png',
+  //   path: '/path/to/desktop/KRA-final-logged-in-screenshot.png',
   //   fullPage: true
   // });
 
@@ -181,9 +181,9 @@ async function main({
 
 function sharpenImage() {
   // sharpen image
-  const inputPath = '/Users/brianhawi/Desktop/KRA-security-capture.png';
+  const inputPath = '/path/to/desktop/KRA-security-capture.png';
   const outputPath =
-    '/Users/brianhawi/Desktop/KRA-security-capture-resized.png';
+    '/path/to/desktop/KRA-security-capture-resized.png';
 
   sharp(inputPath).resize(3274, 1832).sharpen().toFile(outputPath);
 }
@@ -199,7 +199,7 @@ async function evaluateArithmetic(): Promise<number> {
 
     // Performs text detection on the image file
     const [result] = await client.textDetection(
-      '/Users/brianhawi/Desktop/KRA-security-capture-resized.png'
+      '/path/to/desktop/KRA-security-capture-resized.png'
     );
     const labels = result.textAnnotations;
 
