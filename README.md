@@ -55,10 +55,12 @@ Used
     - click on "Continue"
     - enter the KRA password found in the .env file name KRA_PASSWORD
     - Attempt solve the arthimetic field labelled "Security Stamp" and put the answer in the input field
-    - first check the src url for the image tag with the ID captcha_img
-    - append the image src url to https://itax.kra.go.ke/KRA-Portal/
-    - navigate to it on a new tab.
-    - Save the image as "KRA-security-capture"
+        - first check the src url for the image tag with the ID captcha_img
+        - append the image src url to https://itax.kra.go.ke/KRA-Portal/
+        - navigate to it on a new tab.
+        - Save the image as "KRA-security-capture"
+        - Solve the capture and put the answer in the input field
+        - Click on the "Login" button
     - Take a screenshot and save it on my desktop
 - If the portal is not reachable
     - Take a screenshot and save it on my desktop
