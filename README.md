@@ -33,7 +33,7 @@ https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=shari
 https://drive.google.com/file/d/196QiVcCZiJ8AMU21dZfP71qOgOFAU1SX/view?usp=sharing
 
 
-## KRA login attempt. 
+## KRA Automation login attempt. 
 This was an example attempt to see if I could login "as a human" with browser automation tools.
 
 This IS NOT AN ATTEMPT to brute force into the itax portal! BrowserBase provides anti-bot mechanisms and I was attempting to micmic human behaviour.
