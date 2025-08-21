@@ -1,42 +1,10 @@
 # Experimenting: Browser automation with Stagehand
 A Stagehand playground repo. With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
 
-## 🎋 The main branch
-The main branch
-
-### Prompt
-Go to https://github.com/HawiCaesar/hawicaesar and in the about section on the right. 
-The section should have a link that includes vercel.app
-Go to the link that includes vercel.app and extract the about section of the page and console.log it
-
-### Video in action
-https://drive.google.com/file/d/1sFsNYgFx8XfWksmwp5Qu1sUpqAPrcWj-/view?usp=sharing
-
-## 🎋 feat/gobeba-order-water
-
-### Prompt
-- Go over to @https://gobeba.com/ 
-- Click on the card component that is labelled "WATER"
-- Wait for the page to load, say 2 seconds
-- Confirm that "Keringet Mineral Water Refill 20L (Refill Only)" exists
-- Confirm that the price is "Ksh 595"
-- Click on the "ADD TO CART" button link for the "Keringet Mineral Water Refill 20L (Refill Only)" product
-- Wait to see the "View cart" link after the "ADD TO CART" button link
-- Wait for the page to load, say 2 seconds
-- Confirm the following from the cart page
-   1. 	Keringet Mineral Water Refill 20L (Refill Only) priced at 595 with 1 quantity only
-   2. Delivery is Ksh 200
-   3. The total is Ksh 795
-- Take a screenshot and save it on my desktop
-
-### Video in action
-https://drive.google.com/file/d/196QiVcCZiJ8AMU21dZfP71qOgOFAU1SX/view?usp=sharing
-
-
-## KRA Automation login attempt. 
+## 🎋 KRA Automation login attempt. feat/KRA-simple-login
 This was an example attempt to see if I could login "as a human" with browser automation tools.
 
-This IS NOT AN ATTEMPT to brute force into the itax portal! BrowserBase provides anti-bot mechanisms and I was attempting to micmic human behaviour.
+This **IS NOT AN ATTEMPT** to brute force into the itax portal! BrowserBase provides anti-bot mechanisms and I was attempting to micmic human behaviour.
 
 The goal at some point was to allow logging in and viewing payments done.
 Why?
