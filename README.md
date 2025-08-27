@@ -1,6 +1,3 @@
-# Experimenting: Browser automation with Stagehand
-A Stagehand playground repo. With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
-
 ## 🎋 KRA Automation login attempt. feat/KRA-simple-login
 This was an example attempt to see if I could login "as a human" with browser automation tools.
 
