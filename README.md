@@ -1,6 +1,12 @@
 # Experimenting: Browser automation with Stagehand
 A Stagehand playground repo. With this repo I am using branches. The README will include branches trying out various browser automation ideas, the prompt used eventually, and video showing it in action.
 
+## Tools
+- Typescript
+- BrowserBase/Stagehand, 
+- Cursor with Claude 4
+- Anthropic AI with Claude 3.7
+
 ## 🎋 The main branch
 The main branch
 
