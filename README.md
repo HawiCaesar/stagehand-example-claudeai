@@ -1,7 +1,8 @@
 ## 🎋 KRA Automation login attempt. feat/KRA-simple-login
 This was an example attempt to see if I could login "as a human" with browser automation tools.
 
-This **IS NOT AN ATTEMPT** to brute force into the itax portal! BrowserBase provides anti-bot mechanisms and I was attempting to micmic human behaviour.
+This is an **EDUCATIONAL** attempt.
+This **IS NOT AN ATTEMPT** to abuse/misuse (brute force) entry the itax portal! BrowserBase provides anti-bot mechanisms and I was attempting to micmic human behaviour.
 
 The goal at some point was to allow logging in and viewing payments done.
 Why?
