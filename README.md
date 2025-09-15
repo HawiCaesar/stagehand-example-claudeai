@@ -12,7 +12,7 @@ And probably in future allow tax professionals to run scripts automatically.
 Used
 - Google Vision API and Sharp to help solve the capture.
 - BrowserBase basic auto capture tools didnt work for me 🤷🏾‍♂️
-- Claude AI
+- Stagehand + BrowserBase + Claude AI 
 
 ### Prompt
 - Go to https://itax.kra.go.ke/KRA-Portal
